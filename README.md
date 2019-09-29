@@ -89,5 +89,11 @@ k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基�
 ![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-8OFfzZ8pKDg2u4JOueXtjQ.png)
 <center>位于`hostPath`上的PV</center>
 
+就这样！我们在单个节点上运行一个完全分布式的HDFS。如下是我们最终的架构:
+
+![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-7Pt-2dIJi_gGKoPWlOhtcQ.png)
+<center>单节点完全分布式架构</center>
+
+
 
 
