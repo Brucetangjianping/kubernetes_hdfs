@@ -6,15 +6,11 @@
 
 [HDFS的基本架构](#1)
 
-
 [HDFS在Kubernetes上的架构](#2)
-
 
 [将namenode包装在服务中](#3)
 
-
 [通过状态集来标识datanodes](#4)
-
 
 [在单节点上运行完全分布式的HDFS](#5)
 
