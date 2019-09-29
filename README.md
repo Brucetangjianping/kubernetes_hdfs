@@ -1,19 +1,36 @@
-# kubernetes_hdfs
-使用kubernetes部署HDFS
 
-#### 在Kubernetes部署HDFS验证
 
 如果你是Kubernetes专家，那么你可以直接去查看源码[点击这里](https://github.com/hasura/hub-hdfs)
 
-### HDFS的基本架构
+#### 目录
+
+[HDFS的基本架构](#1)
+
+
+[HDFS在Kubernetes上的架构](#2)
+
+
+[将namenode包装在服务中](#3)
+
+
+[通过状态集来标识datanodes](#4)
+
+
+[在单节点上运行完全分布式的HDFS](#5)
+
+
+
+<h3 id="1">HDFS的基本架构</h3>
 
 让我们首先回顾一下完全分布式HDFS的传统体系结构。下图说明了这种体系结构:
 
 - ![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-5vkJ98W6v2Hg9IMPjZvA2A.png)
 
   ```
-  <center>HDFS架构</center>
+  <center>HDFS架构</center>   
   ```
+
+  
 
 通常，有专用的虚拟机用于运行相应的HDFS守护程序即namenodes和datanodes(我们将使用守护程序和可交替运行守护程序的节点)。Namenodes存储每个文件的元数据，datanodes存储实际的数据。每个HDFS有一个namenode和多个datanodes(大多数情况下考虑高可用，会有两个namenode,但是在演示安装过程中，只考虑一个namenode)
 
@@ -21,7 +38,7 @@
 
 
 
-### HDFS在Kubernetes上的架构
+<h3 id="2">HDFS在Kubernetes上的架构</h3>
 
 现在，让我们先了解下一个典型的程序在Kubernetes(也就是我们熟知k8s)是怎样的吧。
 
@@ -33,22 +50,18 @@ Kubernetes是节点集群的容器管理器，这意味着它是在集群上部�
 
 ![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-zo8kdNokpmDtBh6FFEYNcA.png)
 
-```
-       <center>HDFS在kubernetes上的架构</center>
-```
-
-
+<center>HDFS在kubernetes上的架构</center>
 
 不要这么快，你是想将namenode的pod ip直接写在你的datanodes的配置文件里面吗？如果namenode的pod不幸宕机并且在另外的一个服务器中重启（此时pod ip已经发生改变）这该怎么办呢？如果同样的事情发生在datanode上，又该怎么办呢？它们怎么相互联系呢如果他们一直在改变ip，服务器或者是其它在Kubernetes 管理下发生的漂移事件？
 
-#### 所以我们面临如下挑战：
+##### 所以我们面临如下挑战：
 
 1. Namenodes和datanodes可能宕机并且在另外的pod中重启导致了IP的变化，那它们该如何保持互动的呢？
 2. Namenodes和datanodes可能宕机并且在另外的服务器中重启，那么它们正在保存的数据又会发生什么呢？
 
 
 
-### 将namenode包装在服务中
+<h3 id="3">将namenode包装在服务中</h3>
 
 k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基本上在集群中为您提供一个静态IP/hostname，来保证对跨选定的pods之间的请求进行负载均衡。pods的选择是基于在pod定义中注入的标签来选择的。所以我们可以给我们的namenode pod一个名为"app:namenode"的标签，然后创建一个带有该标签的pod服务。
 
@@ -65,8 +78,7 @@ k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基�
 ![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-mk6OQZQAiGeAacc0vWqzjg.png)
 
 <center>在集群中使用HDFS客户端</center>
-
-### 通过状态集来标识datanodes
+<h3 id="4">通过状态集来标识datanodes</h3>
 
 既然我们已经看到了一种与namenode通信的方法，而不用考虑pod行为，那么我们是否可以对datanode做同样的事情呢？
 
@@ -78,7 +90,7 @@ k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基�
 
 
 
-### 在单节点上运行完全分布式的HDFS
+<h3 id="5" >在单节点上运行完全分布式的HDFS</h3>
 
 我们完成了吗?差不多吧，为什么不把所有的工作放在单节点上呢？但是这不是违背了“分布式文件”系统概念吗？不要紧张，在Kubernetes的世界中，分布式的概念是在容器级别。所以，如果我们有多个pods,管理他们的专用磁盘，在一个节点上运行，这就是分布式！
 
@@ -86,14 +98,9 @@ k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基�
 
 我们使用类型为"hostPath"的PV来将虚拟服务器的本地目录作为存储块。而且，我们可以用一个具有不同"hostPath"值的磁盘创建任意数量的磁盘。
 
-![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-8OFfzZ8pKDg2u4JOueXtjQ.png)
-<center>位于`hostPath`上的PV</center>
-
 就这样！我们在单个节点上运行一个完全分布式的HDFS。如下是我们最终的架构:
 
-![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-7Pt-2dIJi_gGKoPWlOhtcQ.png)
-<center>单节点完全分布式架构</center>
 
 
-
+我已经在[Hasura Hub project](https://hasura.io/hub/project/hasura/hdfs) 所以对于您来说很容易的去尝试。你所要做的就是克隆项目(主要是克隆k8s规范文件),然后将它部署到你的服务器上即可。
 
