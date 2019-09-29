@@ -85,6 +85,7 @@ k8s解决pod短暂性问题的方法是使用服务资源，Kubernetes服务基�
 但是对于POC,我们将使用另外的小技巧。我们将模拟单个磁盘上的多个存储卷，并将它们附加到不同的pod上（在更严格的设置中，您将有单独的磁盘支持每个卷，但这只是一个简单的配置问题）。Kubernetes Persistent Volume（PV）资源类型非常适合于此。Kubernetes pv是集群中可用的一组存储卷。一个pod可以请求一个PV，请求成功后将会挂载在pod中。
 
 我们使用类型为"hostPath"的PV来将虚拟服务器的本地目录作为存储块。而且，我们可以用一个具有不同"hostPath"值的磁盘创建任意数量的磁盘。
+![avatar](https://blog.hasura.io/content/images/downloaded_images/getting-started-with-hdfs-on-kubernetes-a75325d4178c/1-8OFfzZ8pKDg2u4JOueXtjQ.png)
 
 
 
